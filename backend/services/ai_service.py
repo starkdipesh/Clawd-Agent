@@ -1,15 +1,11 @@
 import os
-from openai import OpenAI
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 from typing import List, Dict, Optional
+import uuid
 
 class AIService:
     def __init__(self):
         self.api_key = os.getenv('EMERGENT_LLM_KEY')
-        self.client = OpenAI(
-            api_key=self.api_key,
-            base_url="https://api.emergentmethods.ai/v1"
-        )
-        self.model = "gpt-4o-mini"  # Fast and free with Emergent key
     
     async def generate_response(
         self, 
@@ -19,26 +15,30 @@ class AIService:
     ) -> str:
         """Generate AI response using Emergent LLM key"""
         try:
-            formatted_messages = []
+            # Create a unique session ID
+            session_id = str(uuid.uuid4())
             
-            if system_prompt:
-                formatted_messages.append({
-                    "role": "system",
-                    "content": system_prompt
-                })
+            # Initialize chat with emergentintegrations
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=session_id,
+                system_message=system_prompt or "You are a helpful AI assistant named Moltbot."
+            ).with_model("openai", "gpt-4o")
             
-            formatted_messages.extend(messages)
+            # Get the last user message
+            last_message = messages[-1]['content'] if messages else "Hello"
             
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=formatted_messages,
-                temperature=temperature,
-                max_tokens=1000
-            )
+            # Create user message
+            user_message = UserMessage(text=last_message)
             
-            return response.choices[0].message.content
+            # Send message and get response
+            response = await chat.send_message(user_message)
+            
+            return response
         except Exception as e:
             print(f"AI Service Error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return f"I apologize, but I encountered an error: {str(e)}"
     
     async def generate_streaming_response(
@@ -48,26 +48,19 @@ class AIService:
     ):
         """Generate streaming AI response"""
         try:
-            formatted_messages = []
+            session_id = str(uuid.uuid4())
             
-            if system_prompt:
-                formatted_messages.append({
-                    "role": "system",
-                    "content": system_prompt
-                })
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=session_id,
+                system_message=system_prompt or "You are a helpful AI assistant named Moltbot."
+            ).with_model("openai", "gpt-4o")
             
-            formatted_messages.extend(messages)
+            last_message = messages[-1]['content'] if messages else "Hello"
+            user_message = UserMessage(text=last_message)
             
-            stream = self.client.chat.completions.create(
-                model=self.model,
-                messages=formatted_messages,
-                stream=True,
-                max_tokens=1000
-            )
-            
-            for chunk in stream:
-                if chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+            response = await chat.send_message(user_message)
+            yield response
         except Exception as e:
             yield f"Error: {str(e)}"
 
