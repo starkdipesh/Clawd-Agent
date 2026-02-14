@@ -70,9 +70,9 @@ class MoltbotAPITester:
             "name": f"Test User {datetime.now().strftime('%H%M%S')}",
             "email": f"test_{datetime.now().strftime('%H%M%S')}@example.com"
         }
-        success, response = self.run_test("Create User", "POST", "api/users", 201, user_data)
-        if success and 'id' in response:
-            self.user_id = response['id']
+        success, response = self.run_test("Create User", "POST", "api/users/create", 200, user_data)
+        if success and 'user_id' in response:
+            self.user_id = response['user_id']
             print(f"   Created user ID: {self.user_id}")
         return success
 
@@ -81,7 +81,7 @@ class MoltbotAPITester:
         if not self.user_id:
             print("❌ No user ID available for testing")
             return False
-        return self.run_test("Get User", "GET", f"api/users/{self.user_id}", 200)[0]
+        return self.run_test("Get User", "GET", f"api/users/get/{self.user_id}", 200)[0]
 
     def test_create_task(self):
         """Test task creation"""
