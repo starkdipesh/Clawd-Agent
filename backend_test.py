@@ -161,14 +161,14 @@ class MoltbotAPITester:
         if not self.user_id:
             print("❌ No user ID available for testing")
             return False
-        return self.run_test("Get Conversations", "GET", f"api/chat/{self.user_id}/conversations", 200)[0]
+        return self.run_test("Get Conversations", "GET", f"api/chat/conversations/{self.user_id}", 200)[0]
 
     def test_get_conversation_messages(self):
         """Test get conversation messages"""
-        if not self.user_id or not self.conversation_id:
-            print("❌ No user ID or conversation ID available for testing")
+        if not self.conversation_id:
+            print("❌ No conversation ID available for testing")
             return False
-        return self.run_test("Get Conversation Messages", "GET", f"api/chat/{self.user_id}/conversations/{self.conversation_id}", 200)[0]
+        return self.run_test("Get Conversation Messages", "GET", f"api/chat/messages/{self.conversation_id}", 200)[0]
 
     def test_get_memory(self):
         """Test get user memory"""
