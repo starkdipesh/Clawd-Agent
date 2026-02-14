@@ -6,6 +6,7 @@ import { COLORS } from '../utils/constants';
 import ChatScreen from '../screens/ChatScreen';
 import TasksScreen from '../screens/TasksScreen';
 import SkillsScreen from '../screens/SkillsScreen';
+import MessagingScreen from '../screens/MessagingScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator();
