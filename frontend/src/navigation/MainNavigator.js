@@ -69,6 +69,11 @@ export default function MainNavigator() {
         options={{ headerShown: false }}
       />
       <Tab.Screen
+        name="Messaging"
+        component={MessagingScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{ headerShown: false }}
