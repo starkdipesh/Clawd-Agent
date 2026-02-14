@@ -71,3 +71,49 @@ class ChatResponse(BaseModel):
     message_id: str
     response: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+# Messaging Integration Models
+class BotConfiguration(BaseModel):
+    bot_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    platform: str  # telegram, discord, whatsapp, slack
+    bot_name: str
+    bot_token: str
+    webhook_url: Optional[str] = None
+    settings: Dict[str, Any] = Field(default_factory=dict)
+    enabled: bool = True
+    status: str = "active"  # active, inactive, error
+    last_message_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class MessageSync(BaseModel):
+    sync_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    bot_id: str
+    platform: str
+    platform_message_id: str
+    user_id: str
+    direction: str  # incoming, outgoing
+    content: str
+    sender_name: Optional[str] = None
+    sender_id: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    ai_response: Optional[str] = None
+    processed: bool = False
+
+class BotConfigRequest(BaseModel):
+    user_id: str
+    platform: str
+    bot_name: str
+    bot_token: str
+    settings: Dict[str, Any] = Field(default_factory=dict)
+
+class WebhookMessage(BaseModel):
+    platform: str
+    message_id: str
+    sender_id: str
+    sender_name: Optional[str] = None
+    content: str
+    timestamp: Optional[datetime] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
