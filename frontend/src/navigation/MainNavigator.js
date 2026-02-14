@@ -24,6 +24,8 @@ export default function MainNavigator() {
             iconName = focused ? 'list' : 'list-outline';
           } else if (route.name === 'Skills') {
             iconName = focused ? 'extension-puzzle' : 'extension-puzzle-outline';
+          } else if (route.name === 'Messaging') {
+            iconName = focused ? 'send' : 'send-outline';
           } else if (route.name === 'Settings') {
             iconName = focused ? 'settings' : 'settings-outline';
           }
