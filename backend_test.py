@@ -134,11 +134,10 @@ class MoltbotAPITester:
             return False
         
         # First get available skills
-        success, skills_response = self.run_test("Get Skills for Toggle", "GET", "api/skills", 200)
+        success, skills_response = self.run_test("Get Skills for Toggle", "GET", "api/skills/list", 200)
         if success and skills_response.get('skills'):
-            skill_id = skills_response['skills'][0]['id']
-            toggle_data = {"enabled": True}
-            return self.run_test("Toggle Skill", "PUT", f"api/skills/{self.user_id}/{skill_id}", 200, toggle_data)[0]
+            skill_id = skills_response['skills'][0]['skill_id']
+            return self.run_test("Enable Skill", "PUT", f"api/skills/enable/{skill_id}", 200)[0]
         return False
 
     def test_chat_message(self):
