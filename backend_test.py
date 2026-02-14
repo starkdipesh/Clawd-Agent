@@ -120,7 +120,7 @@ class MoltbotAPITester:
 
     def test_get_skills(self):
         """Test get available skills"""
-        return self.run_test("Get Skills", "GET", "api/skills", 200)[0]
+        return self.run_test("Get Skills", "GET", "api/skills/list", 200)[0]
 
     def test_get_user_skills(self):
         """Test get user skills"""
