@@ -90,14 +90,15 @@ class MoltbotAPITester:
             return False
         
         task_data = {
+            "user_id": self.user_id,
             "title": "Test Task",
             "description": "This is a test task",
             "priority": "medium",
             "due_date": "2024-12-31T23:59:59"
         }
-        success, response = self.run_test("Create Task", "POST", f"api/tasks/{self.user_id}", 201, task_data)
-        if success and 'id' in response:
-            self.task_id = response['id']
+        success, response = self.run_test("Create Task", "POST", "api/tasks/create", 200, task_data)
+        if success and 'task_id' in response:
+            self.task_id = response['task_id']
         return success
 
     def test_get_tasks(self):
@@ -105,18 +106,15 @@ class MoltbotAPITester:
         if not self.user_id:
             print("❌ No user ID available for testing")
             return False
-        return self.run_test("Get Tasks", "GET", f"api/tasks/{self.user_id}", 200)[0]
+        return self.run_test("Get Tasks", "GET", f"api/tasks/list/{self.user_id}", 200)[0]
 
     def test_update_task(self):
         """Test task update"""
-        if not self.user_id or not self.task_id:
-            print("❌ No user ID or task ID available for testing")
+        if not self.task_id:
+            print("❌ No task ID available for testing")
             return False
         
-        update_data = {
-            "status": "completed"
-        }
-        return self.run_test("Update Task", "PUT", f"api/tasks/{self.user_id}/{self.task_id}", 200, update_data)[0]
+        return self.run_test("Complete Task", "PUT", f"api/tasks/complete/{self.task_id}", 200)[0]
 
     def test_get_skills(self):
         """Test get available skills"""
