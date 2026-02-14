@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import routers
-from routes import chat, tasks, skills, users, memory, notifications
+from routes import chat, tasks, skills, users, memory, notifications, messaging
 
 # Global database client
 db_client = None
