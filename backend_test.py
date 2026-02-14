@@ -175,7 +175,7 @@ class MoltbotAPITester:
         if not self.user_id:
             print("❌ No user ID available for testing")
             return False
-        return self.run_test("Get Memory", "GET", f"api/memory/{self.user_id}", 200)[0]
+        return self.run_test("Get Memory", "GET", f"api/memory/get/{self.user_id}", 200)[0]
 
     def test_update_memory(self):
         """Test update user memory"""
@@ -184,17 +184,18 @@ class MoltbotAPITester:
             return False
         
         memory_data = {
+            "user_id": self.user_id,
             "key": "test_preference",
             "value": "test_value"
         }
-        return self.run_test("Update Memory", "POST", f"api/memory/{self.user_id}", 200, memory_data)[0]
+        return self.run_test("Store Memory", "POST", "api/memory/store", 200, memory_data)[0]
 
     def test_get_notifications(self):
         """Test get user notifications"""
         if not self.user_id:
             print("❌ No user ID available for testing")
             return False
-        return self.run_test("Get Notifications", "GET", f"api/notifications/{self.user_id}", 200)[0]
+        return self.run_test("Get Notifications", "GET", f"api/notifications/list/{self.user_id}", 200)[0]
 
 def main():
     print("🚀 Starting Moltbot API Tests...")
