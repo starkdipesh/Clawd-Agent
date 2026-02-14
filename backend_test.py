@@ -148,9 +148,10 @@ class MoltbotAPITester:
             return False
         
         chat_data = {
+            "user_id": self.user_id,
             "message": "Hello, this is a test message"
         }
-        success, response = self.run_test("Send Chat Message", "POST", f"api/chat/{self.user_id}", 200, chat_data)
+        success, response = self.run_test("Send Chat Message", "POST", "api/chat/message", 200, chat_data)
         if success and 'conversation_id' in response:
             self.conversation_id = response['conversation_id']
         return success
