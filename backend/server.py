@@ -60,6 +60,10 @@ app.include_router(skills.router)
 app.include_router(users.router)
 app.include_router(memory.router)
 app.include_router(notifications.router)
+app.include_router(messaging.router)
+
+# Set database for messaging routes
+messaging.set_db(db)
 
 @app.get("/")
 async def root():
