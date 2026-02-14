@@ -175,4 +175,52 @@ export const notificationAPI = {
   },
 };
 
+export const messagingAPI = {
+  createBot: async (config) => {
+    const response = await apiClient.post('/api/messaging/config/create', config);
+    return response.data;
+  },
+
+  getBots: async (userId) => {
+    const response = await apiClient.get(`/api/messaging/config/list/${userId}`);
+    return response.data;
+  },
+
+  getBot: async (botId) => {
+    const response = await apiClient.get(`/api/messaging/config/get/${botId}`);
+    return response.data;
+  },
+
+  updateBot: async (botId, updates) => {
+    const response = await apiClient.put(`/api/messaging/config/update/${botId}`, updates);
+    return response.data;
+  },
+
+  deleteBot: async (botId) => {
+    const response = await apiClient.delete(`/api/messaging/config/delete/${botId}`);
+    return response.data;
+  },
+
+  toggleBot: async (botId, enabled) => {
+    const response = await apiClient.put(`/api/messaging/config/toggle/${botId}`, { enabled });
+    return response.data;
+  },
+
+  sendMessage: async (botId, recipient, message, metadata = {}) => {
+    const response = await apiClient.post(`/api/messaging/send/${botId}`, {
+      recipient,
+      message,
+      metadata,
+    });
+    return response.data;
+  },
+
+  getMessages: async (botId, limit = 50) => {
+    const response = await apiClient.get(`/api/messaging/messages/${botId}`, {
+      params: { limit },
+    });
+    return response.data;
+  },
+};
+
 export default apiClient;
