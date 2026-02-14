@@ -125,7 +125,7 @@ class MoltbotAPITester:
         if not self.user_id:
             print("❌ No user ID available for testing")
             return False
-        return self.run_test("Get User Skills", "GET", f"api/skills/{self.user_id}", 200)[0]
+        return self.run_test("Get User Skills", "GET", f"api/skills/enabled?user_id={self.user_id}", 200)[0]
 
     def test_toggle_skill(self):
         """Test toggle skill for user"""
