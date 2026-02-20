@@ -6,7 +6,7 @@ import uuid
 import json
 
 from models.schemas import ChatRequest, ChatResponse, Message
-from services.ai_service import ai_service
+from services.ai_service import AIService
 from services.memory_service import MemoryService
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -72,6 +72,9 @@ Be conversational, helpful, and remember the context from previous messages."""
         ]
         formatted_messages.append({"role": "user", "content": request.message})
         
+        # Initialize AI service with database for skills
+        ai_service = AIService(db)
+        
         # Generate AI response
         ai_response = await ai_service.generate_response(
             messages=formatted_messages,
@@ -101,6 +104,7 @@ Be conversational, helpful, and remember the context from previous messages."""
         )
         
         # Extract insights for memory (async, don't wait)
+        import asyncio
         asyncio.create_task(memory_service.extract_and_store_insights(request.user_id, conversation_id))
         
         return ChatResponse(

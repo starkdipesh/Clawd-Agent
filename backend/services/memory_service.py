@@ -25,13 +25,18 @@ class MemoryService:
         return str(result.inserted_id)
     
     async def get_memories(self, user_id: str, key: Optional[str] = None, limit: int = 10) -> List[Dict]:
-        """Retrieve memories for the user"""
+        """Retrieve memories for a user"""
         query = {"user_id": user_id}
         if key:
             query["key"] = key
         
         cursor = self.memories.find(query).sort("importance", -1).limit(limit)
         memories = await cursor.to_list(length=limit)
+        
+        # Remove MongoDB _id field
+        for memory in memories:
+            memory.pop("_id", None)
+        
         return memories
     
     async def get_conversation_context(self, conversation_id: str, limit: int = 10) -> List[Dict]:
@@ -48,10 +53,15 @@ class MemoryService:
         memories = await self.get_memories(user_id, limit=20)
         user = await self.db.users.find_one({"user_id": user_id})
         
+        if user:
+            user.pop("_id", None)  # Remove MongoDB _id
+        else:
+            user = {"name": "User", "preferences": {}}
+        
         return {
-            "memories": memories,
-            "preferences": user.get("preferences", {}) if user else {},
-            "name": user.get("name", "User") if user else "User"
+            "name": user.get("name", "User"),
+            "preferences": user.get("preferences", {}),
+            "memories": memories
         }
     
     async def update_memory(self, user_id: str, key: str, value: Any):

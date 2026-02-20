@@ -61,7 +61,7 @@ mdurl==0.1.2
 motor==3.3.2
 multidict==6.7.1
 mypy==1.19.1
-mypy_extensions==1.1.0
+mypy_extensions==1.1.1
 numpy==2.4.2
 oauthlib==3.3.1
 openai==1.99.9
@@ -70,7 +70,7 @@ pandas==3.0.0
 passlib==1.7.4
 pathspec==1.0.4
 pillow==12.1.0
-platformdirs==4.5.1
+platformdirs==4.9.2
 pluggy==1.6.0
 propcache==0.4.1
 proto-plus==1.27.1
@@ -87,13 +87,13 @@ PyJWT==2.11.0
 pymongo==4.6.0
 pyparsing==3.3.2
 pytest==9.0.2
+pytokens==0.4.1
+pytz==2025.2
+PyYAML==6.0.3
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.0
 python-jose==3.3.0
 python-multipart==0.0.6
-pytokens==0.4.1
-pytz==2025.2
-PyYAML==6.0.3
 referencing==0.37.0
 regex==2026.1.15
 requests==2.31.0

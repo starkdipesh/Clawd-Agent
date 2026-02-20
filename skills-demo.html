@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moltbot Skills Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .neural-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .neuron {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #00ffff 0%, #0080ff 40%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 0 20px #00ffff, 0 0 40px rgba(0, 255, 255, 0.5);
+        }
+
+        .neuron::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, transparent);
+            transform: translate(-50%, -50%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .neuron::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 80px;
+            background: linear-gradient(180deg, #00ffff, transparent);
+            transform: translate(-50%, -50%);
+            animation: pulse 3s ease-in-out infinite 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(10px) translateX(-10px); }
+            75% { transform: translateY(-10px) translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .skill-card {
+            background: rgba(20, 20, 30, 0.9);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .skill-card h2 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .skill-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .skill-form input, .skill-form select {
+            padding: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 14px;
+            background: rgba(20, 20, 30, 0.8);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .skill-form input:focus, .skill-form select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .skill-form button {
+            padding: 15px;
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .skill-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(10, 10, 20, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 255, 255, 0.2);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            animation: slideDown 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Neural Network Background -->
+    <div class="neural-bg" id="neuralBg"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Moltbot Skills Demo</h1>
+            <p>Test all AI skills directly - No database required!</p>
+        </div>
+
+        <div class="status" id="status">
+            ✅ Skills Demo Ready - Test All Features Below
+        </div>
+
+        <div class="skills-grid">
+            <!-- Weather Skill -->
+            <div class="skill-card">
+                <h2>🌤️ Weather Skill</h2>
+                <div class="skill-form">
+                    <input type="text" id="weatherLocation" placeholder="Enter location (e.g., Delhi, Mumbai)" />
+                    <button onclick="testWeather()">Get Weather</button>
+                </div>
+                <div class="result-box" id="weatherResult">Weather results will appear here...</div>
+            </div>
+
+            <!-- Web Search Skill -->
+            <div class="skill-card">
+                <h2>🔍 Web Search Skill</h2>
+                <div class="skill-form">
+                    <input type="text" id="searchQuery" placeholder="Enter search query" />
+                    <button onclick="testWebSearch()">Search Web</button>
+                </div>
+                <div class="result-box" id="searchResult">Search results will appear here...</div>
+            </div>
+
+            <!-- Calendar Skill -->
+            <div class="skill-card">
+                <h2>📅 Calendar Skill</h2>
+                <div class="skill-form">
+                    <select id="calendarAction">
+                        <option value="list">Show Calendar</option>
+                        <option value="add">Add Event</option>
+                    </select>
+                    <input type="text" id="calendarEvent" placeholder="Event description (for add action)" />
+                    <button onclick="testCalendar()">Execute Calendar</button>
+                </div>
+                <div class="result-box" id="calendarResult">Calendar results will appear here...</div>
+            </div>
+
+            <!-- Email Skill -->
+            <div class="skill-card">
+                <h2>📧 Email Skill</h2>
+                <div class="skill-form">
+                    <select id="emailAction">
+                        <option value="inbox">Check Inbox</option>
+                        <option value="send">Send Email</option>
+                    </select>
+                    <button onclick="testEmail()">Execute Email</button>
+                </div>
+                <div class="result-box" id="emailResult">Email results will appear here...</div>
+            </div>
+
+            <!-- Notes Skill -->
+            <div class="skill-card">
+                <h2>📝 Notes Skill</h2>
+                <div class="skill-form">
+                    <select id="notesAction">
+                        <option value="list">Show Notes</option>
+                        <option value="add">Add Note</option>
+                        <option value="search">Search Notes</option>
+                    </select>
+                    <input type="text" id="notesInput" placeholder="Note text or search query" />
+                    <button onclick="testNotes()">Execute Notes</button>
+                </div>
+                <div class="result-box" id="notesResult">Notes results will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animated neural background
+        function createNeuralBackground() {
+            const neuralBg = document.getElementById('neuralBg');
+            const neuronCount = 12;
+            
+            for (let i = 0; i < neuronCount; i++) {
+                const neuronContainer = document.createElement('div');
+                neuronContainer.style.position = 'absolute';
+                neuronContainer.style.left = Math.random() * 100 + '%';
+                neuronContainer.style.top = Math.random() * 100 + '%';
+                neuronContainer.style.animationDelay = Math.random() * 8 + 's';
+                neuronContainer.style.animationDuration = (8 + Math.random() * 4) + 's';
+                
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                neuronContainer.appendChild(neuron);
+                neuralBg.appendChild(neuronContainer);
+            }
+        }
+
+        // Mock skill functions (simulating backend responses)
+        async function testWeather() {
+            const location = document.getElementById('weatherLocation').value.trim();
+            const resultBox = document.getElementById('weatherResult');
+            
+            if (!location) {
+                resultBox.textContent = '❌ Please enter a location';
+                return;
+            }
+            
+            resultBox.innerHTML = '<div class="loading"></div> Executing weather skill...';
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                const weatherData = {
+                    'delhi': '🌤️ Weather Update for Delhi:\n\n🌡️ Temperature: 32°C\n☁️ Condition: Partly Cloudy\n💧 Humidity: 45%\n💨 Wind: 10 km/h\n\nHave a great day! ☀️',
+                    'mumbai': '🌤️ Weather Update for Mumbai:\n\n🌡️ Temperature: 30°C\n☁️ Condition: Humid\n💧 Humidity: 70%\n💨 Wind: 15 km/h\n\nStay cool! 🌊',
+                    'default': `🌤️ Weather Update for ${location}:\n\n🌡️ Temperature: 25°C\n☁️ Condition: Pleasant\n💧 Humidity: 50%\n💨 Wind: 5 km/h\n\nHave a great day! ☀️`
+                };
+                
+                const locationLower = location.toLowerCase();
+                let result = weatherData.default;
+                
+                if (locationLower.includes('delhi')) result = weatherData.delhi;
+                else if (locationLower.includes('mumbai')) result = weatherData.mumbai;
+                
+                resultBox.textContent = result;
+            }, 1500);
+        }
+
+        async function testWebSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const resultBox = document.getElementById('searchResult');
+            
+            if (!query) {
+                resultBox.textContent = '❌ Please enter a search query';
+                return;
+            }
+            
+            resultBox.innerHTML = '<div class="loading"></div> Searching web...';
+            
+            setTimeout(() => {
+                const result = `🔍 Web Search Results for "${query}":
+
+Here are some search results for '${query}':
+
+1. General information about ${query}
+2. Latest news related to ${query}
+3. Popular resources about ${query}
+
+Would you like more specific information about any of these topics? 🤔`;
+                
+                resultBox.textContent = result;
+            }, 1500);
+        }
+
+        async function testCalendar() {
+            const action = document.getElementById('calendarAction').value;
+            const event = document.getElementById('calendarEvent').value.trim();
+            const resultBox = document.getElementById('calendarResult');
+            
+            resultBox.innerHTML = '<div class="loading"></div> Executing calendar skill...';
+            
+            setTimeout(() => {
+                if (action === 'add') {
+                    if (event) {
+                        resultBox.textContent = `✅ Event added: '${event}' to your calendar 📅`;
+                    } else {
+                        resultBox.textContent = '❌ Please provide an event description to add.';
+                    }
+                } else {
+                    resultBox.textContent = `📅 Your Upcoming Events:
+
+🗓️ Today, Feb 21, 2026:
+• 2:00 PM - Team standup meeting
+• 4:00 PM - Project review session
+• 6:00 PM - Dinner with client
+
+🗓️ Tomorrow, Feb 22, 2026:
+• 10:00 AM - Development planning
+• 2:00 PM - Code review
+• 5:00 PM - Gym workout
+
+🗓️ This Week:
+• Complete Moltbot integration
+• Submit project documentation
+• Prepare presentation slides
+• Weekend hackathon preparation
+
+Would you like me to add a new event or set a reminder? ⏰`;
+                }
+            }, 1500);
+        }
+
+        async function testEmail() {
+            const action = document.getElementById('emailAction').value;
+            const resultBox = document.getElementById('emailResult');
+            
+            resultBox.innerHTML = '<div class="loading"></div> Executing email skill...';
+            
+            setTimeout(() => {
+                if (action === 'send') {
+                    resultBox.textContent = `✅ Email sent successfully!
+
+📧 To: recipient@example.com
+📝 Subject: Test Email
+📄 Message: This is a test email from Moltbot
+
+Your email has been delivered! 🚀`;
+                } else {
+                    resultBox.textContent = `📧 Your Email Inbox (3 unread):
+
+🔴 Important:
+• From: project@company.com - "Q1 Project Deadline Update"
+• From: manager@workplace.com - "Team Meeting Tomorrow"
+
+📋 Regular:
+• From: newsletter@techblog.com - "Latest AI Trends"
+• From: friend@email.com - "Weekend Plans?"
+
+✅ Read:
+• From: support@service.com - "Your subscription renewed"
+• From: team@workplace.com - "Welcome new team member!"
+
+Would you like me to compose a reply or check specific emails? ✍️`;
+                }
+            }, 1500);
+        }
+
+        async function testNotes() {
+            const action = document.getElementById('notesAction').value;
+            const input = document.getElementById('notesInput').value.trim();
+            const resultBox = document.getElementById('notesResult');
+            
+            resultBox.innerHTML = '<div class="loading"></div> Executing notes skill...';
+            
+            setTimeout(() => {
+                if (action === 'add') {
+                    if (input) {
+                        resultBox.textContent = `✅ Note added successfully!
+
+📝 New Note: "${input}"
+🕐 Timestamp: ${new Date().toLocaleString()}
+🏷️ Tags: auto-detected
+
+Your note has been saved and synchronized! 💾`;
+                    } else {
+                        resultBox.textContent = '❌ Please provide a note to add.';
+                    }
+                } else if (action === 'search') {
+                    if (input) {
+                        resultBox.textContent = `🔍 Search Results for "${input}":
+
+📝 Found 3 matching notes:
+1. "Moltbot project - AI integration complete" - Contains project details
+2. "Meeting notes - Discuss Q1 goals" - Related to planning
+3. "Backend API testing completed" - Technical documentation
+
+Would you like me to open any of these notes? 📂`;
+                    } else {
+                        resultBox.textContent = '❌ Please provide search terms.';
+                    }
+                } else {
+                    resultBox.textContent = `📝 Your Recent Notes:
+
+🗒️ Quick Notes:
+• Moltbot project - AI integration complete
+• Meeting notes - Discuss Q1 goals
+• Shopping list: Milk, Eggs, Bread, Coffee
+• Ideas: Neural UI improvements
+
+🗒️ Work Notes:
+• Backend API testing completed
+• Frontend React Native setup pending
+• Documentation needs update
+• Consider deployment options
+
+🗒️ Personal Notes:
+• Call dentist for appointment
+• Birthday gift ideas for friend
+• Vacation planning for March
+• Book recommendations to check
+
+Total: 12 notes | Last updated: Today 📅
+
+Would you like me to add a new note or search existing ones? 🤔`;
+                }
+            }, 1500);
+        }
+
+        // Initialize app when page loads
+        window.addEventListener('load', createNeuralBackground);
+    </script>
+</body>
+</html>

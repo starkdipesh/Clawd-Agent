@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moltbot - AI Personal Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Neural Network Background */
+        .neural-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .neuron {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #00ffff 0%, #0080ff 40%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 0 20px #00ffff, 0 0 40px rgba(0, 255, 255, 0.5);
+        }
+
+        .neuron::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, transparent);
+            transform: translate(-50%, -50%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .neuron::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 80px;
+            background: linear-gradient(180deg, #00ffff, transparent);
+            transform: translate(-50%, -50%);
+            animation: pulse 3s ease-in-out infinite 1s;
+        }
+
+        .neuron-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: #ffffff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #ffffff;
+        }
+
+        .dendrite {
+            position: absolute;
+            width: 1px;
+            height: 30px;
+            background: linear-gradient(180deg, transparent, #00ffff);
+            transform-origin: top center;
+        }
+
+        .axon {
+            position: absolute;
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, #00ffff, transparent);
+            transform-origin: left center;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(10px) translateX(-10px); }
+            75% { transform: translateY(-10px) translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            color: #b0b0b0;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(20, 20, 30, 0.9);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card h2 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+        }
+
+        .chat-container {
+            grid-column: 1 / -1;
+        }
+
+        .chat-messages {
+            height: 450px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(10, 10, 20, 0.8);
+            scrollbar-width: thin;
+            scrollbar-color: #00ffff #1a1a2e;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #00ffff;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #000;
+            margin-left: auto;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .bot-message {
+            background: rgba(30, 30, 40, 0.9);
+            color: #ffffff;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px 25px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 30px;
+            font-size: 16px;
+            background: rgba(20, 20, 30, 0.8);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .chat-input input::placeholder {
+            color: #666;
+        }
+
+        .chat-input button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .task-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .task-form input, .task-form select {
+            padding: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 14px;
+            background: rgba(20, 20, 30, 0.8);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .task-form input:focus, .task-form select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .task-form button {
+            padding: 15px;
+            background: linear-gradient(135deg, #ff00ff, #ff0080);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .task-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 255, 0.4);
+        }
+
+        .task-list {
+            margin-top: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .task-item {
+            padding: 15px;
+            background: rgba(30, 30, 40, 0.9);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            border-color: rgba(0, 255, 255, 0.4);
+            transform: translateX(5px);
+        }
+
+        .task-item h4 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .task-item .priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: linear-gradient(135deg, #ff0040, #ff8080);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(255, 0, 64, 0.4);
+        }
+
+        .priority-medium {
+            background: linear-gradient(135deg, #ff8000, #ffcc00);
+            color: #000000;
+            box-shadow: 0 2px 8px rgba(255, 128, 0, 0.4);
+        }
+
+        .priority-low {
+            background: linear-gradient(135deg, #00ff00, #80ff80);
+            color: #000000;
+            box-shadow: 0 2px 8px rgba(0, 255, 0, 0.4);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .skill-item {
+            padding: 20px;
+            background: rgba(30, 30, 40, 0.9);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .skill-item:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
+        }
+
+        .skill-item.enabled {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .skill-item h4 {
+            margin: 0 0 8px 0;
+            color: #00ffff;
+            font-size: 16px;
+        }
+
+        .skill-item p {
+            margin: 0;
+            font-size: 12px;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        .status {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .status.error {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: rgba(255, 0, 0, 0.3);
+            color: #ff4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 255, 255, 0.2);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 968px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .chat-messages {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Neural Network Background -->
+    <div class="neural-bg" id="neuralBg"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Moltbot</h1>
+            <p>Advanced AI Personal Assistant with Neural Interface</p>
+        </div>
+
+        <div class="status" id="status">
+            <div class="loading"></div> Connecting to Moltbot Neural Network...
+        </div>
+
+        <div class="app-grid">
+            <!-- Chat Interface -->
+            <div class="card chat-container">
+                <h2>🧠 Neural Chat Interface</h2>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        🌟 Welcome to Moltbot! I'm your advanced AI assistant. How can I help you today?
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Type your neural command..." />
+                    <button onclick="sendMessage()">🚀 Send</button>
+                </div>
+            </div>
+
+            <!-- Task Management -->
+            <div class="card">
+                <h2>📋 Task Matrix</h2>
+                <div class="task-form">
+                    <input type="text" id="taskTitle" placeholder="Enter task objective..." />
+                    <select id="taskPriority">
+                        <option value="low">🟢 Low Priority</option>
+                        <option value="medium">🟡 Medium Priority</option>
+                        <option value="high">🔴 High Priority</option>
+                    </select>
+                    <button onclick="createTask()">➕ Add Task</button>
+                </div>
+                <div class="task-list" id="taskList"></div>
+            </div>
+
+            <!-- Skills Management -->
+            <div class="card">
+                <h2>⚡ Neural Skills</h2>
+                <div class="skills-grid" id="skillsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001';
+        let currentUser = null;
+        let conversationId = null;
+
+        // Create animated neural background
+        function createNeuralBackground() {
+            const neuralBg = document.getElementById('neuralBg');
+            const neuronCount = 12;
+            
+            for (let i = 0; i < neuronCount; i++) {
+                const neuronContainer = document.createElement('div');
+                neuronContainer.style.position = 'absolute';
+                neuronContainer.style.left = Math.random() * 100 + '%';
+                neuronContainer.style.top = Math.random() * 100 + '%';
+                neuronContainer.style.animationDelay = Math.random() * 8 + 's';
+                neuronContainer.style.animationDuration = (8 + Math.random() * 4) + 's';
+                
+                // Create main neuron body
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                
+                // Create neuron core (nucleus)
+                const core = document.createElement('div');
+                core.className = 'neuron-core';
+                neuron.appendChild(core);
+                
+                // Create dendrites (incoming connections)
+                const dendriteCount = 3 + Math.floor(Math.random() * 3);
+                for (let j = 0; j < dendriteCount; j++) {
+                    const dendrite = document.createElement('div');
+                    dendrite.className = 'dendrite';
+                    const angle = (360 / dendriteCount) * j;
+                    dendrite.style.transform = `rotate(${angle}deg) translateY(-15px)`;
+                    dendrite.style.animationDelay = Math.random() * 2 + 's';
+                    neuron.appendChild(dendrite);
+                }
+                
+                // Create axons (outgoing connections)
+                const axonCount = 2 + Math.floor(Math.random() * 2);
+                for (let j = 0; j < axonCount; j++) {
+                    const axon = document.createElement('div');
+                    axon.className = 'axon';
+                    const angle = (180 / axonCount) * j + 45;
+                    axon.style.transform = `rotate(${angle}deg) translateX(6px)`;
+                    axon.style.animationDelay = Math.random() * 2 + 's';
+                    neuron.appendChild(axon);
+                }
+                
+                neuronContainer.appendChild(neuron);
+                neuralBg.appendChild(neuronContainer);
+            }
+            
+            // Create neural connections between nearby neurons
+            createNeuralConnections();
+        }
+        
+        // Create connections between neurons
+        function createNeuralConnections() {
+            const neuralBg = document.getElementById('neuralBg');
+            const connectionCount = 8;
+            
+            for (let i = 0; i < connectionCount; i++) {
+                setTimeout(() => {
+                    const connection = document.createElement('div');
+                    connection.style.position = 'absolute';
+                    connection.style.width = Math.random() * 150 + 50 + 'px';
+                    connection.style.height = '1px';
+                    connection.style.background = 'linear-gradient(90deg, transparent, #00ffff, transparent)';
+                    connection.style.left = Math.random() * 100 + '%';
+                    connection.style.top = Math.random() * 100 + '%';
+                    connection.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    connection.style.opacity = '0.3';
+                    connection.style.animation = `pulse ${3 + Math.random() * 2}s ease-in-out infinite`;
+                    connection.style.animationDelay = Math.random() * 3 + 's';
+                    neuralBg.appendChild(connection);
+                }, i * 200);
+            }
+        }
+
+        // Initialize app
+        async function init() {
+            createNeuralBackground();
+            
+            try {
+                // Check API health
+                const healthResponse = await fetch(`${API_BASE}/api/health`);
+                const health = await healthResponse.json();
+                
+                if (health.status === 'healthy') {
+                    document.getElementById('status').innerHTML = '✅ Neural Network Connected - All Systems Operational';
+                    document.getElementById('status').className = 'status';
+                    
+                    // Create a test user
+                    await createUser();
+                    await loadSkills();
+                    await loadTasks();
+                } else {
+                    throw new Error('API not healthy');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Neural Network Connection Failed - Ensure backend is running on port 8001';
+                document.getElementById('status').className = 'status error';
+            }
+        }
+
+        // Create a user
+        async function createUser() {
+            try {
+                const response = await fetch(`${API_BASE}/api/users/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Neural User',
+                        email: `neural-${Date.now()}@moltbot.ai`
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                currentUser = data.user_id;
+                console.log('User created:', currentUser);
+            } catch (error) {
+                console.error('Error creating user:', error);
+                // Use fallback user ID for demo
+                currentUser = 'demo-user-' + Date.now();
+            }
+        }
+
+        // Send chat message
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            console.log('Sending message:', message, 'User:', currentUser);
+            
+            if (!message || !currentUser) {
+                console.log('Cannot send message - missing data:', { message: !!message, currentUser: !!currentUser });
+                return;
+            }
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            addMessage('🧠 Processing neural response...', 'bot');
+
+            try {
+                console.log('Making request to:', `${API_BASE}/api/chat/message`);
+                const response = await fetch(`${API_BASE}/api/chat/message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUser,
+                        message: message,
+                        conversation_id: conversationId
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Chat response data:', data);
+                
+                // Remove typing indicator
+                const messages = document.querySelectorAll('.message');
+                if (messages.length > 0) {
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.textContent.includes('Processing neural response')) {
+                        lastMessage.remove();
+                    }
+                }
+                
+                conversationId = data.conversation_id;
+                addMessage(data.response, 'bot');
+            } catch (error) {
+                console.error('Chat error:', error);
+                // Remove typing indicator on error too
+                const messages = document.querySelectorAll('.message');
+                if (messages.length > 0) {
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.textContent.includes('Processing neural response')) {
+                        lastMessage.remove();
+                    }
+                }
+                addMessage('❌ Neural pathway error. Please try again.', 'bot');
+            }
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Create task
+        async function createTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+            
+            if (!title || !currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/tasks/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUser,
+                        title: title,
+                        priority: priority
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                document.getElementById('taskTitle').value = '';
+                await loadTasks();
+            } catch (error) {
+                console.error('Error creating task:', error);
+                addMessage('❌ Failed to create task. Please try again.', 'bot');
+            }
+        }
+
+        // Load tasks
+        async function loadTasks() {
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/tasks/list/${currentUser}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '';
+
+                if (data.tasks && data.tasks.length > 0) {
+                    data.tasks.forEach(task => {
+                        const taskDiv = document.createElement('div');
+                        taskDiv.className = 'task-item';
+                        taskDiv.innerHTML = `
+                            <h4>${task.title}</h4>
+                            <span class="priority priority-${task.priority}">${task.priority.toUpperCase()}</span>
+                        `;
+                        taskList.appendChild(taskDiv);
+                    });
+                } else {
+                    taskList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">🎯 No tasks yet. Create your first objective!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '<p style="text-align: center; color: #ff4444; padding: 20px;">❌ Failed to load tasks</p>';
+            }
+        }
+
+        // Load skills
+        async function loadSkills() {
+            try {
+                console.log('Loading skills from:', `${API_BASE}/api/skills/list`);
+                const response = await fetch(`${API_BASE}/api/skills/list`);
+                
+                console.log('Skills response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Skills data received:', data);
+                
+                const skillsGrid = document.getElementById('skillsGrid');
+                skillsGrid.innerHTML = '';
+
+                if (data.skills && Array.isArray(data.skills)) {
+                    console.log('Processing', data.skills.length, 'skills');
+                    data.skills.forEach(skill => {
+                        const skillDiv = document.createElement('div');
+                        skillDiv.className = `skill-item ${skill.enabled ? 'enabled' : ''}`;
+                        skillDiv.innerHTML = `
+                            <h4>${skill.name}</h4>
+                            <p>${skill.description}</p>
+                        `;
+                        skillsGrid.appendChild(skillDiv);
+                    });
+                } else {
+                    console.log('No skills array found in response');
+                    skillsGrid.innerHTML = '<p style="color: #ff4444;">⚠️ No skills available</p>';
+                }
+            } catch (error) {
+                console.error('Error loading skills:', error);
+                const skillsGrid = document.getElementById('skillsGrid');
+                skillsGrid.innerHTML = '<p style="color: #ff4444;">❌ Failed to load skills: ' + error.message + '</p>';
+            }
+        }
+
+        // Handle Enter key in chat
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Handle Enter key in task input
+        document.getElementById('taskTitle').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                createTask();
+            }
+        });
+
+        // Initialize app when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

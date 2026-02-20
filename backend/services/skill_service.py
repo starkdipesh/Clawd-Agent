@@ -41,8 +41,8 @@ class SkillService:
     
     async def execute_skill(self, skill_name: str, parameters: Dict) -> Dict:
         """Execute a skill with given parameters"""
-        # Load skill module dynamically
         try:
+            # Import skill module dynamically
             skill_module = importlib.import_module(f"skills.{skill_name}")
             result = await skill_module.execute(parameters)
             return {"success": True, "result": result}
